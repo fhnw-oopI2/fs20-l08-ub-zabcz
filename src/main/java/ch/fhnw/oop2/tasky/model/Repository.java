@@ -23,7 +23,15 @@ public interface Repository {
 	 * @return Die Liste mit allen Tasks (unsortiert). Die Liste ist leer, wenn es keine Tasks gibt
 	 */
 	List<Task> read();
-	
+
+	/**
+	 * Liest alle Tasks im Repository mit Status <state> und gibt sie zurück. Die Tasks sind nicht sortiert.
+	 *
+	 * @return Die Liste mit allen Tasks (unsortiert). Die Liste ist leer, wenn es keine Tasks gibt
+	 */
+	List<Task> readByStatus(Status state);
+
+
 	/**
 	 * Liest die Task mit der spezifierten ID. Falls die ID nicht exisitert wird null zurück gegeben.
 	 * 

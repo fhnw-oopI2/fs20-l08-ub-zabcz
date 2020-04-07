@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import ch.fhnw.oop2.tasky.model.Repository;
+import ch.fhnw.oop2.tasky.model.Status;
 import ch.fhnw.oop2.tasky.model.Task;
 import ch.fhnw.oop2.tasky.model.TaskData;
 
@@ -24,7 +25,17 @@ public class InMemoryMapRepository implements Repository {
 	public List<Task> read() {
 		return new ArrayList<>(allTasks.values());
 	}
-	
+
+	@Override public List<Task> readByStatus(Status state) {
+		List<Task> ret = new ArrayList();
+		for (Map.Entry<Long, Task> entry : allTasks.entrySet()) {
+			if (entry.getValue().data.state == state){
+				ret.add(entry.getValue());
+			}
+		}
+		return ret;
+	}
+
 	@Override
 	public Task read(long id) {
 		return allTasks.get(id);

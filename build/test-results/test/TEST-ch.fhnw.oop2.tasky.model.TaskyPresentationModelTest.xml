@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="ch.fhnw.oop2.tasky.model.TaskyPresentationModelTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2020-04-07T16:27:20" hostname="LENOVO-L390-YOG" time="0.018">
+  <properties/>
+  <testcase name="stageTitleProperty()" classname="ch.fhnw.oop2.tasky.model.TaskyPresentationModelTest" time="0.012"/>
+  <testcase name="updateTask()" classname="ch.fhnw.oop2.tasky.model.TaskyPresentationModelTest" time="0.001"/>
+  <testcase name="initDummyTasks()" classname="ch.fhnw.oop2.tasky.model.TaskyPresentationModelTest" time="0.0"/>
+  <testcase name="getRepo()" classname="ch.fhnw.oop2.tasky.model.TaskyPresentationModelTest" time="0.001"/>
+  <testcase name="deleteTask()" classname="ch.fhnw.oop2.tasky.model.TaskyPresentationModelTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

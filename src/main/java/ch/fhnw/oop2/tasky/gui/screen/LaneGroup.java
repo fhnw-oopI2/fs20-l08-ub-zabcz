@@ -13,7 +13,7 @@ import javafx.scene.layout.HBox;
  * resizable sind.
  *
  */
-final class LaneGroup extends GridPane {
+public final class LaneGroup extends GridPane {
 
 	private TaskyPresentationModel model;
 
@@ -23,26 +23,25 @@ final class LaneGroup extends GridPane {
 	
 	private Button btnCreate;
 	private Button btnRefresh;
-	
 
 	/**
 	 * Erzeugt eine neue LaneGroup.
-	 * 
+	 *
 	 * @param lanes Die Lanes in der Gruppe
 	 */
-	LaneGroup(ApplicationUI gui, TaskyPresentationModel model,  Lane... lanes) {
+	public LaneGroup(TaskyPresentationModel model, Lane... lanes) {
 		this.model = model;
-		initializeControls(gui);
+		initializeControls();
 		layoutControls(lanes);
 	}
 	
-	private void initializeControls(ApplicationUI gui) {
+	private void initializeControls() {
 		btnCreate = new Button("New");
 		btnRefresh = new Button("Refresh");
 
 		// set actoin on button click
-		btnCreate.setOnAction(event -> model.newTask());
-		btnRefresh.setOnAction(event -> gui.showTaskInDetail());
+		btnCreate.setOnAction(event -> model.createTask());
+		btnRefresh.setOnAction(event -> model.refresh());
 	}
 	
 	private void layoutControls(Lane... lanes) {

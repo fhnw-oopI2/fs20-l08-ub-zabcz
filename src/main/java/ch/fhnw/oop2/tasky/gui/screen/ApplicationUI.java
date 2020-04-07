@@ -1,5 +1,7 @@
 package ch.fhnw.oop2.tasky.gui.screen;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.List;
 
 import ch.fhnw.oop2.tasky.model.Status;
@@ -20,15 +22,14 @@ public final class ApplicationUI extends GridPane {
 	private static final int DETAILS_PERCENT = 40;
 	public final static String[] COLORS = { "#2ecc71", "#3498db", "#e74c3c", "#9b59b6" };
 
-	private Lane todo;
-	private Lane doing;
-	private Lane done;
-	private Lane review;
-
 	private TaskyPresentationModel model;
 	private Detail detailView;
 
 	private LaneGroup laneGroup;
+	private Lane todo;
+	private Lane doing;
+	private Lane done;
+	private Lane review;
 
 	/**
 	 * Erzeugt einen neuen MainScreen.
@@ -37,45 +38,30 @@ public final class ApplicationUI extends GridPane {
 	public ApplicationUI(TaskyPresentationModel model) {
 		this.model = model;
 		detailView = new Detail(model);
-		initializeControls();
+		buildLanes();
 		layoutControls();
-	}
-
-	private void initializeControls() {
-		refreshTaskLanes();
 	}
 
 	/**
 	 * Anzeigen aller Tasks, eingeordnet in die Lanes
 	 */
-	private void refreshTaskLanes() {
+	public void buildLanes() {
 		// remove laneGroup from gridpane to prevent dead task regions
 		getChildren().remove(laneGroup);
 
-		// create private list of all tasks from repo
-		List<Task> all_tasks = model.getRepo().read();
+		List<Lane> lanesList = new ArrayList<>();
 
-		//todo: for each status in AllStatus() do:
-
-		// create lists for each state
-		List<Task> todo_tasks = Task.reduceList(all_tasks, Status.Todo);
-		List<Task> doing_tasks = Task.reduceList(all_tasks, Status.Doing);
-		List<Task> done_tasks = Task.reduceList(all_tasks, Status.Done);
-		List<Task> review_tasks = Task.reduceList(all_tasks, Status.Review);
-
-		// create regions for every task in its specific state
-		List<Region> todo_regions = model.createRegionsForTasks(todo_tasks, COLORS[Status.Todo.ordinal()]);
-		List<Region> doing_regions = model.createRegionsForTasks(doing_tasks, COLORS[Status.Doing.ordinal()]);
-		List<Region> done_regions = model.createRegionsForTasks(done_tasks, COLORS[Status.Done.ordinal()]);
-		List<Region> review_regions = model.createRegionsForTasks(review_tasks, COLORS[Status.Review.ordinal()]);
+		//for each status in AllStatus() do:
+		int index = 0;
+		for(Status state : Status.getAllStati()) {
+			lanesList.add(new Lane(state, (String) Array.get(COLORS, index++), model));
+		}
+		// prep
+		Lane[] lanesArray = new Lane[lanesList.size()] ;
+		lanesArray = lanesList.toArray(lanesArray);
 
 		// create lanes for each list of region
-		todo = new Lane (Status.Todo.name(), todo_regions);
-		doing = new Lane (Status.Doing.name(), doing_regions);
-		done = new Lane (Status.Done.name(), done_regions);
-		review = new Lane (Status.Review.name(), review_regions);
-
-		laneGroup = new LaneGroup(this, model, todo, doing, done, review);
+		laneGroup = new LaneGroup(model, lanesArray);
 		add(laneGroup, 0, 0);
 
 	}
@@ -87,8 +73,8 @@ public final class ApplicationUI extends GridPane {
 		ConstraintHelper.setRowPercentConstraint(this, 100); // Höhe soll generell voll ausgefüllt werden.
 		
 		ConstraintHelper.setColumnPercentConstraint(this, TASKLANE_PERCENT);
-		add(new LaneGroup(this, model, todo, doing, done, review), 0, 0);
-		
+		//add(new LaneGroup(model, todo, doing, done, review), 0, 0);
+
 		ConstraintHelper.setColumnPercentConstraint(this, DETAILS_PERCENT);
 
 		add(detailView, 1, 0);
@@ -97,8 +83,6 @@ public final class ApplicationUI extends GridPane {
 	/**
 	 * refreshes all task lanes
 	 */
-	public void showTaskInDetail() {
-		refreshTaskLanes();
-	}
+
 
 }

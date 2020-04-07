@@ -1,5 +1,6 @@
 package ch.fhnw.oop2.tasky.model;
 
+import ch.fhnw.oop2.tasky.gui.screen.Lane;
 import ch.fhnw.oop2.tasky.model.impl.InMemoryMapRepository;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
@@ -9,10 +10,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.layout.Region;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 public class TaskyPresentationModel {
@@ -21,6 +20,7 @@ public class TaskyPresentationModel {
     private static final int MAX_DUMMY_TASKS = 4;
 
     private Repository repo;
+    private final List<Task> tasks;
 
     // Properties
     private final StringProperty stageTitle;
@@ -33,12 +33,17 @@ public class TaskyPresentationModel {
     private final ObjectProperty<LocalDate> date;
     private final ObjectProperty<Status> state;
 
+    private Lane todo;
+    private Lane doing;
+    private Lane done;
+    private Lane review;
+
     public TaskyPresentationModel() {
         // init properties
         stageTitle = new SimpleStringProperty("JavaFX Application Tasky");
         taskSelected = new SimpleLongProperty();
         id = new SimpleLongProperty();
-        initListener(id); // add listener to id
+        initListener(taskSelected); // add listener to id
         desc = new SimpleStringProperty();
         title = new SimpleStringProperty();
         date = new SimpleObjectProperty<>(LocalDate.now()); // Localdate
@@ -48,50 +53,24 @@ public class TaskyPresentationModel {
         repo = new InMemoryMapRepository();
         // fill gui with dummy tasks
         this.initDummyTasks();
+        tasks = repo.read();
     }
 
     /**
      * implement functional interface "ChangeListener"
      */
     private void initListener(LongProperty id) {
-        id.addListener(new ChangeListener(){
+        taskSelected.addListener(new ChangeListener(){
             // if id changes, lookup other fileds
             @Override public void changed(ObservableValue observable, Object oldValue, Object newValue) {
                 Task temp = getRepo().read(id.get());
+                idProperty().set(temp.id);
                 title.set(temp.data.title);
                 desc.set(temp.data.desc);
                 date.set(temp.data.dueDate);
                 state.set(temp.data.state);
             }
         });
-    }
-
-    /**
-     * fired on click on Button "New"
-     * creates new Task in repo with empty TaskData
-     */
-    public void newTask() {
-        System.out.println(this.getClass() + "newTask()");
-        Task task = this.getRepo().create(new TaskData("", "", LocalDate.now(), Status.Todo));
-        this.taskSelectedProperty().set(task.id);
-        System.out.println(this.taskSelectedProperty().toString());
-        //refreshTaskLanes();
-        System.out.println("create");
-        //detailView.setUp();
-    }
-
-    /**
-     * Speichert den eingegebenen Task im repository
-     */
-    public void updateTask(Task tmp) {
-        repo.update(tmp);
-    }
-
-    /**
-     * Löscht den neu erstellten Task aus dem repo
-     */
-    public void deleteTask(long task_id) {
-        repo.delete(task_id);
     }
 
     /**
@@ -112,36 +91,44 @@ public class TaskyPresentationModel {
     }
 
     /**
-     * creates region for every task with color
-     * @param color Color as Hex-String
-     * @param tasks List von Tasks
-     * @return  Liste von neuen Regions
+     * refreshes all tasks in repo
      */
-    public List<Region> createRegionsForTasks(List<Task> tasks, String color) {
-        List<Region> tasks_as_region = new ArrayList<>();
-
-        for (Task t : tasks) {
-            // create region with color and title
-            Region region = Task.createRegionWithText(color, t.data.title);
-            // create click handler on every region
-            region.onMouseClickedProperty().set(event -> this.mouseClickAction(t.id)); //taskSelected.set(t.id));
-            // add region to list of regions
-            tasks_as_region.add(region);
-        }
-        return tasks_as_region;
+    public void refresh() {
+        tasks.clear();
+        tasks.addAll(repo.read());
     }
 
     /**
-     * Loescht den Task im aktuellen Form und leert das Form
+     * fired on click on Button "New"
+     * creates new Task in repo with empty TaskData
      */
-    public void deleteTask(){
-        if (this.idProperty().get() != 0 ){
-            this.deleteTask(this.idProperty().get());
-        }
-       // cleanUp();
+    public void createTask() {
+        System.out.println("createTask entered");
+        Task task = this.getRepo().create(new TaskData("", "", LocalDate.now(), Status.Todo));
+        this.taskSelectedProperty().set(task.id);
+        System.out.println("task_id:" +task.id);
+        System.out.println("taskSelectedProperty:" + taskSelectedProperty().get());
+        tasks.add(task);
+        // cleanup before user enters a task
+        cleanUp();
+        System.out.println("createTask done");
     }
 
-    public void updateFrom(LongProperty id){
+    /**
+     * Speichert den eingegebenen Task im repository
+     */
+    public void updateTask(Task tmp) {
+        repo.update(tmp);
+    }
+
+    /**
+     * Löscht den neu erstellten Task aus dem repo
+     */
+    public void deleteTask(long task_id) {
+        repo.delete(task_id);
+    }
+
+    public void updateForm(LongProperty id){
         Task temp = this.getRepo().read(id.get());
         this.titleProperty().set(temp.data.title);
         this.descProperty().set(temp.data.desc);
@@ -161,15 +148,52 @@ public class TaskyPresentationModel {
     }
 
     /**
+     * Loescht den Task im aktuellen Form und leert das Form
+     */
+    public void deleteTask(){
+        if (this.idProperty().get() != 0 ){
+            this.deleteTask(this.idProperty().get());
+        }
+        // cleanUp();
+    }
+
+    /**
      * Handles Mouse click on Region
      */
     public void mouseClickAction(Long id) {
-        //System.out.println("mouse click fired");
+        System.out.println("mouse click fired id:" +id );
         this.taskSelectedProperty().set(id);
-        this.updateFrom(this.taskSelectedProperty());
+        System.out.println("property_id:" +taskSelectedProperty().get() );
+        this.updateForm(this.taskSelectedProperty());
         //this.buttonsEnable();
     }
 
+    /**
+     * Leert das Form mit eingegebenen Informationen
+     */
+    public void cleanUp(){
+        this.titleProperty().set("");
+        this.descProperty().set("");
+        this.dateProperty().set(null);
+        this.stateProperty().set(null);
+
+        //this.buttonsDisable();
+    }
+
+    /**
+     * Hook fuer nach dem Klick auf "New".
+     * Hier kann init, cleanup, button disable eingefuegt werden.
+     * */
+    public void setUp() {
+        // setup Form
+        this.titleProperty().set("");
+        this.descProperty().set("");
+        this.dateProperty().set(LocalDate.now()); // Localdate
+        this.stateProperty().set(Status.Todo); // Status
+
+        // activate buttons
+        //this.buttonsEnable();
+    }
 
     /**
      * Getter: repo

@@ -1,10 +1,8 @@
 package ch.fhnw.oop2.tasky.gui.screen;
 
 import ch.fhnw.oop2.tasky.model.Status;
-import ch.fhnw.oop2.tasky.model.Task;
-import ch.fhnw.oop2.tasky.model.TaskData;
 import ch.fhnw.oop2.tasky.model.TaskyPresentationModel;
-import javafx.beans.property.LongProperty;
+import javafx.util.converter.NumberStringConverter;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -15,7 +13,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 
-import java.time.LocalDate;
 
 /**
  * Diese Klasse sorgt dafür, dass alle Controls für die Detailansicht 
@@ -70,7 +67,7 @@ final class Detail extends GridPane {
 		idField = new TextField();
 		idField.setDisable(true);
 		// bind to AppUI
-		idField.textProperty().bind(model.idProperty().asString());
+		idField.textProperty().bindBidirectional(model.idProperty(), new NumberStringConverter());
 
 		titleField = new TextField();
 		titleField.textProperty().bindBidirectional(model.titleProperty()); // String to String - no Converter
@@ -91,7 +88,7 @@ final class Detail extends GridPane {
 		buttonSave.setOnAction(event -> model.saveTask());
 		buttonDelete.setOnAction(event -> model.deleteTask());
 
-		buttonsDisable();
+		//buttonsDisable();
 	}
 
 	/**
@@ -134,40 +131,13 @@ final class Detail extends GridPane {
 	}
 
 	public void buttonsEnable(){
-		buttonSave.setDisable(false);
-		buttonDelete.setDisable(false);
+		//buttonSave.setDisable(false);
+		//buttonDelete.setDisable(false);
 	}
 
 	public void buttonsDisable(){
-		buttonSave.setDisable(true);
-		buttonDelete.setDisable(true);
-	}
-
-	/**
-	 * Leert das Form mit eingegebenen Informationen
-	 */
-	public void cleanUp(){
-		model.titleProperty().set("");
-		model.descProperty().set("");
-		model.dateProperty().set(null);
-		model.stateProperty().set(null);
-
-		this.buttonsDisable();
-	}
-
-	/**
-	 * Hook fuer nach dem Klick auf "New".
-	 * Hier kann init, cleanup, button disable eingefuegt werden.
-	 * */
-	public void setUp() {
-		// setup Form
-		model.titleProperty().set("");
-		model.descProperty().set("");
-		model.dateProperty().set(LocalDate.now()); // Localdate
-		model.stateProperty().set(Status.Todo); // Status
-
-		// activate buttons
-		this.buttonsEnable();
+		//buttonSave.setDisable(true);
+		//buttonDelete.setDisable(true);
 	}
 
 
