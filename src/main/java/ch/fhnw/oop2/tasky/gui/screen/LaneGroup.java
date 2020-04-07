@@ -2,6 +2,7 @@ package ch.fhnw.oop2.tasky.gui.screen;
 
 import java.util.stream.IntStream;
 
+import ch.fhnw.oop2.tasky.model.TaskyPresentationModel;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.layout.GridPane;
@@ -13,7 +14,9 @@ import javafx.scene.layout.HBox;
  *
  */
 final class LaneGroup extends GridPane {
-	
+
+	private TaskyPresentationModel model;
+
 	private static double ONE_HUNDRED_PERCENT = 100.0;
 	private static double BOTTOM_HEIGHT_PERCENT = 10.0;
 	private static double LANE_HEIGHT_PERCENT = ONE_HUNDRED_PERCENT - BOTTOM_HEIGHT_PERCENT;
@@ -27,7 +30,8 @@ final class LaneGroup extends GridPane {
 	 * 
 	 * @param lanes Die Lanes in der Gruppe
 	 */
-	LaneGroup(ApplicationUI gui, Lane... lanes) {
+	LaneGroup(ApplicationUI gui, TaskyPresentationModel model,  Lane... lanes) {
+		this.model = model;
 		initializeControls(gui);
 		layoutControls(lanes);
 	}
@@ -37,7 +41,7 @@ final class LaneGroup extends GridPane {
 		btnRefresh = new Button("Refresh");
 
 		// set actoin on button click
-		btnCreate.setOnAction(event -> gui.newTask());
+		btnCreate.setOnAction(event -> model.newTask());
 		btnRefresh.setOnAction(event -> gui.showTaskInDetail());
 	}
 	

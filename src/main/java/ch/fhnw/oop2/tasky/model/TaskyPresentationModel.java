@@ -9,8 +9,11 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.scene.layout.Region;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TaskyPresentationModel {
     // constants
@@ -29,7 +32,7 @@ public class TaskyPresentationModel {
     private final StringProperty title;
     private final ObjectProperty<LocalDate> date;
     private final ObjectProperty<Status> state;
-    
+
     public TaskyPresentationModel() {
         // init properties
         stageTitle = new SimpleStringProperty("JavaFX Application Tasky");
@@ -41,13 +44,10 @@ public class TaskyPresentationModel {
         date = new SimpleObjectProperty<>(LocalDate.now()); // Localdate
         state = new SimpleObjectProperty<>(Status.Todo); // Status
 
-        // sync property of task id
-        //taskSelected.bindBidirectional(detailView.getTaskIdProperty());
-
+        // create repo
         repo = new InMemoryMapRepository();
-        System.out.println("pm done");
-
-
+        // fill gui with dummy tasks
+        this.initDummyTasks();
     }
 
     /**
@@ -64,6 +64,20 @@ public class TaskyPresentationModel {
                 state.set(temp.data.state);
             }
         });
+    }
+
+    /**
+     * fired on click on Button "New"
+     * creates new Task in repo with empty TaskData
+     */
+    public void newTask() {
+        System.out.println(this.getClass() + "newTask()");
+        Task task = this.getRepo().create(new TaskData("", "", LocalDate.now(), Status.Todo));
+        this.taskSelectedProperty().set(task.id);
+        System.out.println(this.taskSelectedProperty().toString());
+        //refreshTaskLanes();
+        System.out.println("create");
+        //detailView.setUp();
     }
 
     /**
@@ -96,6 +110,66 @@ public class TaskyPresentationModel {
         }
 
     }
+
+    /**
+     * creates region for every task with color
+     * @param color Color as Hex-String
+     * @param tasks List von Tasks
+     * @return  Liste von neuen Regions
+     */
+    public List<Region> createRegionsForTasks(List<Task> tasks, String color) {
+        List<Region> tasks_as_region = new ArrayList<>();
+
+        for (Task t : tasks) {
+            // create region with color and title
+            Region region = Task.createRegionWithText(color, t.data.title);
+            // create click handler on every region
+            region.onMouseClickedProperty().set(event -> this.mouseClickAction(t.id)); //taskSelected.set(t.id));
+            // add region to list of regions
+            tasks_as_region.add(region);
+        }
+        return tasks_as_region;
+    }
+
+    /**
+     * Loescht den Task im aktuellen Form und leert das Form
+     */
+    public void deleteTask(){
+        if (this.idProperty().get() != 0 ){
+            this.deleteTask(this.idProperty().get());
+        }
+       // cleanUp();
+    }
+
+    public void updateFrom(LongProperty id){
+        Task temp = this.getRepo().read(id.get());
+        this.titleProperty().set(temp.data.title);
+        this.descProperty().set(temp.data.desc);
+        this.dateProperty().set(temp.data.dueDate);
+        this.stateProperty().set(temp.data.state);
+    }
+
+    /**
+     * Speichert die eingegeben Infos als Task temporär ab und gibt die weiter ans AppGui
+     */
+    public void saveTask(){
+        TaskData taskdata = new TaskData(this.titleProperty().get(), this.descProperty().get(), this.dateProperty().get(), this.stateProperty().get());
+        Task tmp = new Task(this.idProperty().get(), taskdata);
+        System.out.println("detail: " + taskdata.toString());
+        this.updateTask(tmp);
+        //cleanUp();
+    }
+
+    /**
+     * Handles Mouse click on Region
+     */
+    public void mouseClickAction(Long id) {
+        //System.out.println("mouse click fired");
+        this.taskSelectedProperty().set(id);
+        this.updateFrom(this.taskSelectedProperty());
+        //this.buttonsEnable();
+    }
+
 
     /**
      * Getter: repo

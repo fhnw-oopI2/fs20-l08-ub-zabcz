@@ -53,10 +53,8 @@ final class Detail extends GridPane {
 	 */
 	Detail(TaskyPresentationModel model) {
 		this.model = model;
-		System.out.println("detail entered");
 		initializeControls();
 		layoutControls();
-		System.out.println("detail done");
 	}
 
 	/**
@@ -72,16 +70,17 @@ final class Detail extends GridPane {
 		idField = new TextField();
 		idField.setDisable(true);
 		// bind to AppUI
-		System.out.println("before binding");
 		idField.textProperty().bind(model.idProperty().asString());
-		System.out.println("after binding");
+
 		titleField = new TextField();
 		titleField.textProperty().bindBidirectional(model.titleProperty()); // String to String - no Converter
+
 		descriptionField = new TextArea();
 		descriptionField.textProperty().bindBidirectional(model.descProperty()); // String to String - no Converter
 
 		datePicker = new DatePicker();
 		datePicker.valueProperty().bindBidirectional(model.dateProperty()); // value property wie bei slider
+
 		stateDropDown = new ComboBox<>();
 		stateDropDown.getItems().addAll(Status.getAllStati());
 		stateDropDown.valueProperty().bindBidirectional(model.stateProperty()); // value property wie bei slider
@@ -89,8 +88,9 @@ final class Detail extends GridPane {
 		buttonSave = new Button("Save");
 		buttonDelete = new Button("Delete");
 
-		buttonSave.setOnAction(event -> saveTask());
-		buttonDelete.setOnAction(event -> deleteTask());
+		buttonSave.setOnAction(event -> model.saveTask());
+		buttonDelete.setOnAction(event -> model.deleteTask());
+
 		buttonsDisable();
 	}
 
@@ -133,15 +133,14 @@ final class Detail extends GridPane {
 		GridPane.setMargin(buttons, new Insets(20, 0, 0, 0));
 	}
 
-	/**
-	 * Speichert die eingegeben Infos als Task temporär ab und gibt die weiter ans AppGui
-	 */
-	public void saveTask(){
-		TaskData taskdata = new TaskData(model.titleProperty().get(), model.descProperty().get(), model.dateProperty().get(), model.stateProperty().get());
-		Task tmp = new Task(model.idProperty().get(), taskdata);
-		System.out.println("detail: " + taskdata.toString());
-		model.updateTask(tmp);
-		cleanUp();
+	public void buttonsEnable(){
+		buttonSave.setDisable(false);
+		buttonDelete.setDisable(false);
+	}
+
+	public void buttonsDisable(){
+		buttonSave.setDisable(true);
+		buttonDelete.setDisable(true);
 	}
 
 	/**
@@ -153,7 +152,7 @@ final class Detail extends GridPane {
 		model.dateProperty().set(null);
 		model.stateProperty().set(null);
 
-		buttonsDisable();
+		this.buttonsDisable();
 	}
 
 	/**
@@ -168,34 +167,8 @@ final class Detail extends GridPane {
 		model.stateProperty().set(Status.Todo); // Status
 
 		// activate buttons
-		buttonsEnable();
+		this.buttonsEnable();
 	}
 
-	/**
-	 * Loescht den Task im aktuellen Form und leert das Form
-	 */
-	public void deleteTask(){
-		if (model.idProperty().get() != 0 ){
-			model.deleteTask(model.idProperty().get());
-		}
-		cleanUp();
-	}
 
-	public void buttonsEnable(){
-		buttonSave.setDisable(false);
-		buttonDelete.setDisable(false);
-	}
-
-	public void buttonsDisable(){
-		buttonSave.setDisable(true);
-		buttonDelete.setDisable(true);
-	}
-
-	public void updateFrom(LongProperty id){
-		Task temp = model.getRepo().read(id.get());
-		model.titleProperty().set(temp.data.title);
-		model.descProperty().set(temp.data.desc);
-		model.dateProperty().set(temp.data.dueDate);
-		model.stateProperty().set(temp.data.state);
-	}
 }

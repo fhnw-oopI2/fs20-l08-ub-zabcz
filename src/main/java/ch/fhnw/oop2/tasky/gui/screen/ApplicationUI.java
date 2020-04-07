@@ -1,17 +1,12 @@
 package ch.fhnw.oop2.tasky.gui.screen;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 import ch.fhnw.oop2.tasky.model.Status;
 import ch.fhnw.oop2.tasky.model.Task;
-import ch.fhnw.oop2.tasky.model.TaskData;
 import ch.fhnw.oop2.tasky.model.TaskyPresentationModel;
-import javafx.beans.property.LongProperty;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
-import javafx.beans.property.SimpleLongProperty;
 
 /**
  * Diese Klasse teilt den Bildschirm in die zwei Hauptgebiete auf:
@@ -42,8 +37,6 @@ public final class ApplicationUI extends GridPane {
 	public ApplicationUI(TaskyPresentationModel model) {
 		this.model = model;
 		detailView = new Detail(model);
-		// fill gui with dummy tasks
-		model.initDummyTasks();
 		initializeControls();
 		layoutControls();
 	}
@@ -71,10 +64,10 @@ public final class ApplicationUI extends GridPane {
 		List<Task> review_tasks = Task.reduceList(all_tasks, Status.Review);
 
 		// create regions for every task in its specific state
-		List<Region> todo_regions = createRegionsForTasks(todo_tasks, COLORS[Status.Todo.ordinal()]);
-		List<Region> doing_regions = createRegionsForTasks(doing_tasks, COLORS[Status.Doing.ordinal()]);
-		List<Region> done_regions = createRegionsForTasks(done_tasks, COLORS[Status.Done.ordinal()]);
-		List<Region> review_regions = createRegionsForTasks(review_tasks, COLORS[Status.Review.ordinal()]);
+		List<Region> todo_regions = model.createRegionsForTasks(todo_tasks, COLORS[Status.Todo.ordinal()]);
+		List<Region> doing_regions = model.createRegionsForTasks(doing_tasks, COLORS[Status.Doing.ordinal()]);
+		List<Region> done_regions = model.createRegionsForTasks(done_tasks, COLORS[Status.Done.ordinal()]);
+		List<Region> review_regions = model.createRegionsForTasks(review_tasks, COLORS[Status.Review.ordinal()]);
 
 		// create lanes for each list of region
 		todo = new Lane (Status.Todo.name(), todo_regions);
@@ -82,7 +75,7 @@ public final class ApplicationUI extends GridPane {
 		done = new Lane (Status.Done.name(), done_regions);
 		review = new Lane (Status.Review.name(), review_regions);
 
-		laneGroup = new LaneGroup(this, todo, doing, done, review);
+		laneGroup = new LaneGroup(this, model, todo, doing, done, review);
 		add(laneGroup, 0, 0);
 
 	}
@@ -94,7 +87,7 @@ public final class ApplicationUI extends GridPane {
 		ConstraintHelper.setRowPercentConstraint(this, 100); // Höhe soll generell voll ausgefüllt werden.
 		
 		ConstraintHelper.setColumnPercentConstraint(this, TASKLANE_PERCENT);
-		add(new LaneGroup(this, todo, doing, done, review), 0, 0);
+		add(new LaneGroup(this, model, todo, doing, done, review), 0, 0);
 		
 		ConstraintHelper.setColumnPercentConstraint(this, DETAILS_PERCENT);
 
@@ -102,55 +95,10 @@ public final class ApplicationUI extends GridPane {
 	}
 
 	/**
-	 * creates region for every task with color
-	 * @param color Color as Hex-String
-	 * @param tasks List von Tasks
-	 * @return  Liste von neuen Regions
-	 */
-	private List<Region> createRegionsForTasks(List<Task> tasks, String color) {
-		List<Region> tasks_as_region = new ArrayList<>();
-
-		for (Task t : tasks) {
-			// create region with color and title
-			Region region = Task.createRegionWithText(color, t.data.title);
-			// create click handler on every region
-			region.onMouseClickedProperty().set(event -> mouseClickAction(t.id)); //taskSelected.set(t.id));
-			// add region to list of regions
-			tasks_as_region.add(region);
-		}
-		return tasks_as_region;
-	}
-
-	/**
-	 * fired on click on Button "New"
-	 * creates new Task in repo with empty TaskData
-	 */
-	public void newTask() {
-		System.out.println(this.getClass() + "newTask()");
-		Task task = model.getRepo().create(new TaskData("", "", LocalDate.now(), Status.Todo));
-		model.taskSelectedProperty().set(task.id);
-		System.out.println(model.taskSelectedProperty().toString());
-		refreshTaskLanes();
-		System.out.println("create");
-		detailView.setUp();
-	}
-
-	/**
 	 * refreshes all task lanes
 	 */
 	public void showTaskInDetail() {
 		refreshTaskLanes();
-	}
-
-
-	/**
-	 * Handles Mouse click on Region
-	 */
-	public void mouseClickAction(Long id) {
-		//System.out.println("mouse click fired");
-		model.taskSelectedProperty().set(id);
-		detailView.updateFrom(model.taskSelectedProperty());
-		detailView.buttonsEnable();
 	}
 
 }
