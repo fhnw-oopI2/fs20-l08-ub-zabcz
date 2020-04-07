@@ -1,14 +1,15 @@
-package ch.fhnw.oop2.tasky.part5.ui.screen;
+package ch.fhnw.oop2.tasky.gui.screen;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import ch.fhnw.oop2.tasky.part1.model.Repository;
-import ch.fhnw.oop2.tasky.part1.model.Status;
-import ch.fhnw.oop2.tasky.part1.model.Task;
-import ch.fhnw.oop2.tasky.part1.model.TaskData;
-import ch.fhnw.oop2.tasky.part1.model.impl.InMemoryMapRepository;
+import ch.fhnw.oop2.tasky.model.Repository;
+import ch.fhnw.oop2.tasky.model.Status;
+import ch.fhnw.oop2.tasky.model.Task;
+import ch.fhnw.oop2.tasky.model.TaskData;
+import ch.fhnw.oop2.tasky.model.TaskyPresentationModel;
+import ch.fhnw.oop2.tasky.model.impl.InMemoryMapRepository;
 import javafx.beans.property.LongProperty;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
@@ -42,8 +43,9 @@ public final class ApplicationUI extends GridPane {
 
 	/**
 	 * Erzeugt einen neuen MainScreen.
-	 */
-	public ApplicationUI() {
+     * @param model
+     */
+	public ApplicationUI(TaskyPresentationModel model) {
 		repo = new InMemoryMapRepository();
 		detailView = new Detail(this);
 		initDummyTasks();

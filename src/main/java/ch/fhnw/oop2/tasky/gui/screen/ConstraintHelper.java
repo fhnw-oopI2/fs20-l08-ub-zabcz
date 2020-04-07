@@ -1,4 +1,4 @@
-package ch.fhnw.oop2.tasky.part5.ui.screen;
+package ch.fhnw.oop2.tasky.gui.screen;
 
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;

@@ -1,6 +1,7 @@
-package ch.fhnw.oop2.tasky.part5.ui;
+package ch.fhnw.oop2.tasky.gui;
 
-import ch.fhnw.oop2.tasky.part5.ui.screen.ApplicationUI;
+import ch.fhnw.oop2.tasky.gui.screen.ApplicationUI;
+import ch.fhnw.oop2.tasky.model.TaskyPresentationModel;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -11,17 +12,15 @@ import javafx.stage.Stage;
  *
  */
 public final class Tasky extends Application {
-
-	private static final String STAGE_TITLE = "Tasky";
 	
 	@Override
 	public void start(Stage stage) throws Exception {
-		
-		Parent root = new ApplicationUI();
-		
+
+		TaskyPresentationModel model = new TaskyPresentationModel();
+		Parent root = new ApplicationUI(model);
 		final Scene scene = new Scene(root, 800, 400);
 	
-		stage.setTitle(STAGE_TITLE);
+		stage.titleProperty().bind(model.stageTitleProperty());
 		stage.setScene(scene);
 		stage.setResizable(true);
 		stage.show();

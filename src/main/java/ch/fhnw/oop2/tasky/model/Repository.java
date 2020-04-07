@@ -1,4 +1,4 @@
-package ch.fhnw.oop2.tasky.part1.model;
+package ch.fhnw.oop2.tasky.model;
 
 import java.util.List;
 

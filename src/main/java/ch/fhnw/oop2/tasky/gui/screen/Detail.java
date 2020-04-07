@@ -1,8 +1,8 @@
-package ch.fhnw.oop2.tasky.part5.ui.screen;
+package ch.fhnw.oop2.tasky.gui.screen;
 
-import ch.fhnw.oop2.tasky.part1.model.Status;
-import ch.fhnw.oop2.tasky.part1.model.Task;
-import ch.fhnw.oop2.tasky.part1.model.TaskData;
+import ch.fhnw.oop2.tasky.model.Status;
+import ch.fhnw.oop2.tasky.model.Task;
+import ch.fhnw.oop2.tasky.model.TaskData;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.LongProperty;

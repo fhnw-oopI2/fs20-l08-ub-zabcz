@@ -1,13 +1,13 @@
-package ch.fhnw.oop2.tasky.part1.model.impl;
+package ch.fhnw.oop2.tasky.model.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import ch.fhnw.oop2.tasky.part1.model.Repository;
-import ch.fhnw.oop2.tasky.part1.model.Task;
-import ch.fhnw.oop2.tasky.part1.model.TaskData;
+import ch.fhnw.oop2.tasky.model.Repository;
+import ch.fhnw.oop2.tasky.model.Task;
+import ch.fhnw.oop2.tasky.model.TaskData;
 
 /**
  * In Memory Variante eines Repository. Diese Implementation basiert auf 
