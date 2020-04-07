@@ -3,14 +3,8 @@ package ch.fhnw.oop2.tasky.gui.screen;
 import ch.fhnw.oop2.tasky.model.Status;
 import ch.fhnw.oop2.tasky.model.Task;
 import ch.fhnw.oop2.tasky.model.TaskData;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleLongProperty;
+import ch.fhnw.oop2.tasky.model.TaskyPresentationModel;
 import javafx.beans.property.LongProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -20,7 +14,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.util.converter.NumberStringConverter;
 
 import java.time.LocalDate;
 
@@ -35,7 +28,7 @@ import java.time.LocalDate;
  */
 final class Detail extends GridPane {
 
-	private ApplicationUI gui;
+	private TaskyPresentationModel model;
 
 	private Label labelId;
 	private Label labelTitle;
@@ -50,45 +43,20 @@ final class Detail extends GridPane {
 	private DatePicker datePicker;
 	private ComboBox<Status> stateDropDown;
 	
-	private Button buttonNew;
+	private Button buttonSave;
 	private Button buttonDelete;
-
-	private final LongProperty id;
-	private final StringProperty desc;
-	private final StringProperty title;
-	private final ObjectProperty<LocalDate> date;
-	private final ObjectProperty<Status> state;
-
 	
 	/**
 	 * Erzeugt eine neue Detailansicht.
+	 *
+	 * @param model Presentation Model
 	 */
-	Detail(ApplicationUI gui) {
-		this.gui = gui;
-		id = new SimpleLongProperty();
-		initListener(id);
-		desc = new SimpleStringProperty();
-		title = new SimpleStringProperty();
-		date = new SimpleObjectProperty<>(LocalDate.now()); // Localdate
-		state = new SimpleObjectProperty<>(Status.Todo); // Status
+	Detail(TaskyPresentationModel model) {
+		this.model = model;
+		System.out.println("detail entered");
 		initializeControls();
 		layoutControls();
-	}
-
-	/**
-	 * implement functional interface "ChangeListener"
-	 */
-	private void initListener(LongProperty id) {
-		id.addListener(new ChangeListener(){
-			// if id changes, lookup other fileds
-			@Override public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-				Task temp = gui.getRepo().read(id.get());
-				title.set(temp.data.title);
-				desc.set(temp.data.desc);
-				date.set(temp.data.dueDate);
-				state.set(temp.data.state);
-			}
-		});
+		System.out.println("detail done");
 	}
 
 	/**
@@ -104,24 +72,24 @@ final class Detail extends GridPane {
 		idField = new TextField();
 		idField.setDisable(true);
 		// bind to AppUI
-		idField.textProperty().bindBidirectional(id, new NumberStringConverter());
-		idField.textProperty().bindBidirectional(id, new NumberStringConverter());
-
+		System.out.println("before binding");
+		idField.textProperty().bind(model.idProperty().asString());
+		System.out.println("after binding");
 		titleField = new TextField();
-		titleField.textProperty().bindBidirectional(title); // String to String - no Converter
+		titleField.textProperty().bindBidirectional(model.titleProperty()); // String to String - no Converter
 		descriptionField = new TextArea();
-		descriptionField.textProperty().bindBidirectional(desc); // String to String - no Converter
+		descriptionField.textProperty().bindBidirectional(model.descProperty()); // String to String - no Converter
 
 		datePicker = new DatePicker();
-		datePicker.valueProperty().bindBidirectional(date); // value property wie bei slider
+		datePicker.valueProperty().bindBidirectional(model.dateProperty()); // value property wie bei slider
 		stateDropDown = new ComboBox<>();
 		stateDropDown.getItems().addAll(Status.getAllStati());
-		stateDropDown.valueProperty().bindBidirectional(state); // value property wie bei slider
+		stateDropDown.valueProperty().bindBidirectional(model.stateProperty()); // value property wie bei slider
 		
-		buttonNew = new Button("Save");
+		buttonSave = new Button("Save");
 		buttonDelete = new Button("Delete");
 
-		buttonNew.setOnAction(event -> saveTask());
+		buttonSave.setOnAction(event -> saveTask());
 		buttonDelete.setOnAction(event -> deleteTask());
 		buttonsDisable();
 	}
@@ -160,26 +128,19 @@ final class Detail extends GridPane {
 		// Buttons werden als HBox mit Colspan hinzugefügt.
 		HBox buttons = new HBox();
 		buttons.setSpacing(10);
-		buttons.getChildren().addAll(buttonNew, buttonDelete);
+		buttons.getChildren().addAll(buttonSave, buttonDelete);
 		add(buttons, 0, 5, 2, 1);
 		GridPane.setMargin(buttons, new Insets(20, 0, 0, 0));
-	}
-
-	/**
-	 * Gibt das ID Property zurueck, wie in AB 04.
-	 */
-	public LongProperty getTaskIdProperty() {
-		return id;
 	}
 
 	/**
 	 * Speichert die eingegeben Infos als Task temporär ab und gibt die weiter ans AppGui
 	 */
 	public void saveTask(){
-		TaskData taskdata = new TaskData(title.get(), desc.get(), date.get(), state.get());
-		Task tmp = new Task(id.get(), taskdata);
+		TaskData taskdata = new TaskData(model.titleProperty().get(), model.descProperty().get(), model.dateProperty().get(), model.stateProperty().get());
+		Task tmp = new Task(model.idProperty().get(), taskdata);
 		System.out.println("detail: " + taskdata.toString());
-		gui.updateTask(tmp);
+		model.updateTask(tmp);
 		cleanUp();
 	}
 
@@ -187,10 +148,10 @@ final class Detail extends GridPane {
 	 * Leert das Form mit eingegebenen Informationen
 	 */
 	public void cleanUp(){
-		title.set("");
-		desc.set("");
-		date.set(null);
-		state.set(null);
+		model.titleProperty().set("");
+		model.descProperty().set("");
+		model.dateProperty().set(null);
+		model.stateProperty().set(null);
 
 		buttonsDisable();
 	}
@@ -201,10 +162,10 @@ final class Detail extends GridPane {
 	 * */
 	public void setUp() {
 		// setup Form
-		title.set("");
-		desc.set("");
-		date.set(LocalDate.now()); // Localdate
-		state.set(Status.Todo); // Status
+		model.titleProperty().set("");
+		model.descProperty().set("");
+		model.dateProperty().set(LocalDate.now()); // Localdate
+		model.stateProperty().set(Status.Todo); // Status
 
 		// activate buttons
 		buttonsEnable();
@@ -214,27 +175,27 @@ final class Detail extends GridPane {
 	 * Loescht den Task im aktuellen Form und leert das Form
 	 */
 	public void deleteTask(){
-		if (id.get() != 0 ){
-			gui.deleteTask(id.get());
+		if (model.idProperty().get() != 0 ){
+			model.deleteTask(model.idProperty().get());
 		}
 		cleanUp();
 	}
 
 	public void buttonsEnable(){
-		buttonNew.setDisable(false);
+		buttonSave.setDisable(false);
 		buttonDelete.setDisable(false);
 	}
 
 	public void buttonsDisable(){
-		buttonNew.setDisable(true);
+		buttonSave.setDisable(true);
 		buttonDelete.setDisable(true);
 	}
 
 	public void updateFrom(LongProperty id){
-		Task temp = gui.getRepo().read(id.get());
-		title.set(temp.data.title);
-		desc.set(temp.data.desc);
-		date.set(temp.data.dueDate);
-		state.set(temp.data.state);
+		Task temp = model.getRepo().read(id.get());
+		model.titleProperty().set(temp.data.title);
+		model.descProperty().set(temp.data.desc);
+		model.dateProperty().set(temp.data.dueDate);
+		model.stateProperty().set(temp.data.state);
 	}
 }
