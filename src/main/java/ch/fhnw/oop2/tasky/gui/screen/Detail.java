@@ -81,9 +81,14 @@ final class Detail extends GridPane {
 		stateDropDown = new ComboBox<>();
 		stateDropDown.getItems().addAll(Status.getAllStati());
 		stateDropDown.valueProperty().bindBidirectional(model.stateProperty()); // value property wie bei slider
-		
-		buttonSave = new Button("Save");
-		buttonDelete = new Button("Delete");
+
+		buttonSave = new Button();
+		buttonDelete = new Button();
+		buttonSave.textProperty().bind(model.buttonSaveTextProperty());
+		buttonDelete.textProperty().bind(model.buttonDeleteTextProperty());
+		// https://docs.oracle.com/javase/8/javafx/api/javafx/scene/Node.html#disableProperty
+		buttonSave.disableProperty().bindBidirectional(model.buttonSaveDisableProperty());
+		buttonDelete.disableProperty().bindBidirectional(model.buttonDeleteDisableProperty());
 
 		buttonSave.setOnAction(event -> model.saveTask());
 		buttonDelete.setOnAction(event -> model.deleteTask());
@@ -128,16 +133,6 @@ final class Detail extends GridPane {
 		buttons.getChildren().addAll(buttonSave, buttonDelete);
 		add(buttons, 0, 5, 2, 1);
 		GridPane.setMargin(buttons, new Insets(20, 0, 0, 0));
-	}
-
-	public void buttonsEnable(){
-		//buttonSave.setDisable(false);
-		//buttonDelete.setDisable(false);
-	}
-
-	public void buttonsDisable(){
-		//buttonSave.setDisable(true);
-		//buttonDelete.setDisable(true);
 	}
 
 

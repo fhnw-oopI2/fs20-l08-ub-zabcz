@@ -1,8 +1,10 @@
 package ch.fhnw.oop2.tasky.model;
 
 import ch.fhnw.oop2.tasky.model.impl.InMemoryMapRepository;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -32,6 +34,10 @@ public class TaskyPresentationModel {
     private final StringProperty title;
     private final ObjectProperty<LocalDate> date;
     private final ObjectProperty<Status> state;
+    private final StringProperty buttonSaveText;
+    private final StringProperty buttonDeleteText;
+    private final BooleanProperty buttonSaveDisable;
+    private final BooleanProperty buttonDeleteDisable;
 
     // public ctor
     public TaskyPresentationModel() {
@@ -44,6 +50,11 @@ public class TaskyPresentationModel {
         title = new SimpleStringProperty();
         date = new SimpleObjectProperty<>(LocalDate.now()); // Localdate
         state = new SimpleObjectProperty<>(Status.Todo); // Status
+        // set text of each button and set each button to false, when starting application
+        buttonSaveText = new SimpleStringProperty("Safe");
+        buttonDeleteText = new SimpleStringProperty("Delete");
+        buttonSaveDisable = new SimpleBooleanProperty(true);
+        buttonDeleteDisable = new SimpleBooleanProperty(true);
 
         // create repo
         repo = new InMemoryMapRepository();
@@ -115,14 +126,11 @@ public class TaskyPresentationModel {
      * creates new Task in repo with empty TaskData
      */
     public void createTask() {
-        System.out.println("createTask entered");
         Task task = this.getRepo().create(new TaskData("", "", LocalDate.now(), Status.Todo));
         this.taskSelectedProperty().set(task.id);
-        System.out.println("task_id:" +task.id);
-        System.out.println("taskSelectedProperty:" + taskSelectedProperty().get());
         tasks.add(task);
         // cleanup before user enters a task
-        cleanForm();
+        setupForm();
     }
 
     /**
@@ -132,16 +140,23 @@ public class TaskyPresentationModel {
         TaskData taskdata = new TaskData(this.titleProperty().get(), this.descProperty().get(), this.dateProperty().get(), this.stateProperty().get());
         Task tmp = new Task(this.idProperty().get(), taskdata);
         repo.update(tmp);
+        refresh();
     }
 
     /**
-     * Loescht den Task im aktuellen Form und leert das Form
+     * delete Task
+     * delete Task in repo and delete task from observable list
      */
     public void deleteTask(){
         if (this.idProperty().get() != 0 ){
+            // delete from repo
             this.repo.delete(this.idProperty().get());
+            // set 0, means no task selected in gui
             taskSelected.set(0);
-            tasks.removeIf(t -> t.id == this.idProperty().get());
+            // remove deleted task from observable list
+            tasks.remove(getRepo().read(this.idProperty().get()));
+            // refresh gui, to prevent dead tasks displayed in gui
+            refresh();
         }
     }
     /*************************************************************
@@ -158,7 +173,7 @@ public class TaskyPresentationModel {
         this.dateProperty().set(null);
         this.stateProperty().set(null);
 
-        //this.buttonsDisable();
+        buttonsDisable();
     }
 
     /**
@@ -173,7 +188,23 @@ public class TaskyPresentationModel {
         this.stateProperty().set(Status.Todo); // Status
 
         // activate buttons
-        //this.buttonsEnable();
+        buttonsEnable();
+    }
+
+    /**
+     * sets button "Safe" and "delete" to visible
+     * */
+    public void buttonsEnable(){
+        setButtonSaveDisable(false);
+        setButtonDeleteDisable(false);
+    }
+
+    /**
+     * sets button "Safe" and "delete" to disabled
+     * */
+    public void buttonsDisable(){
+        setButtonSaveDisable(true);
+        setButtonDeleteDisable(true);
     }
 
     /*************************************************************
@@ -181,6 +212,15 @@ public class TaskyPresentationModel {
      *                  EVENT Actions                            *
      *                                                           *
      *************************************************************/
+    /**
+     * Handles Mouse click on Region
+     */
+    public void mouseClickAction(Long id) {
+        this.taskSelectedProperty().set(id);
+        this.updateForm(this.taskSelectedProperty());
+        buttonsEnable();
+    }
+
     /**
      * Handles MouseClick-Action on a task to update Form
      * */
@@ -192,23 +232,11 @@ public class TaskyPresentationModel {
         this.stateProperty().set(temp.data.state);
     }
 
-    /**
-     * Handles Mouse click on Region
-     */
-    public void mouseClickAction(Long id) {
-        System.out.println("mouse click fired id:" +id );
-        this.taskSelectedProperty().set(id);
-        System.out.println("property_id:" +taskSelectedProperty().get() );
-        this.updateForm(this.taskSelectedProperty());
-        //this.buttonsEnable();
-    }
-
     /*************************************************************
      *                                                           *
      *                 GETTER and SETTER                         *
      *                                                           *
      *************************************************************/
-
     /**
      * Getter: repo
      */
@@ -220,7 +248,34 @@ public class TaskyPresentationModel {
         return tasks;
     }
 
-    // Property-Getter
+    // Property-Getter and Setter
+    public void setButtonSaveDisable(boolean buttonSaveDisable) {
+        this.buttonSaveDisable.set(buttonSaveDisable);
+    }
+
+    public void setButtonDeleteDisable(boolean buttonDeleteDisable) {
+        this.buttonDeleteDisable.set(buttonDeleteDisable);
+    }
+
+    public StringProperty buttonSaveTextProperty() {
+        return buttonSaveText;
+    }
+
+
+    public StringProperty buttonDeleteTextProperty() {
+        return buttonDeleteText;
+    }
+
+
+    public BooleanProperty buttonSaveDisableProperty() {
+        return buttonSaveDisable;
+    }
+
+
+    public BooleanProperty buttonDeleteDisableProperty() {
+        return buttonDeleteDisable;
+    }
+
     public StringProperty stageTitleProperty() {
         return stageTitle;
     }
