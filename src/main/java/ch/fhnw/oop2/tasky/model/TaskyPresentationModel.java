@@ -1,6 +1,5 @@
 package ch.fhnw.oop2.tasky.model;
 
-import ch.fhnw.oop2.tasky.gui.screen.Lane;
 import ch.fhnw.oop2.tasky.model.impl.InMemoryMapRepository;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
@@ -10,9 +9,10 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.time.LocalDate;
-import java.util.List;
 
 public class TaskyPresentationModel {
     // constants
@@ -20,24 +20,20 @@ public class TaskyPresentationModel {
     private static final int MAX_DUMMY_TASKS = 4;
 
     private Repository repo;
-    private final List<Task> tasks;
+    private ObservableList<Task> tasks;
 
     // Properties
     private final StringProperty stageTitle;
     // sync property for task id
     private final LongProperty taskSelected;
-    // detail properties
+    // detail form properties
     private final LongProperty id;
     private final StringProperty desc;
     private final StringProperty title;
     private final ObjectProperty<LocalDate> date;
     private final ObjectProperty<Status> state;
 
-    private Lane todo;
-    private Lane doing;
-    private Lane done;
-    private Lane review;
-
+    // public ctor
     public TaskyPresentationModel() {
         // init properties
         stageTitle = new SimpleStringProperty("JavaFX Application Tasky");
@@ -51,11 +47,17 @@ public class TaskyPresentationModel {
 
         // create repo
         repo = new InMemoryMapRepository();
+        tasks = FXCollections.observableArrayList();
         // fill gui with dummy tasks
         this.initDummyTasks();
-        tasks = repo.read();
+        tasks.addAll(repo.read());
     }
 
+    /*************************************************************
+     *                                                           *
+     *                       INIT Section                        *
+     *                                                           *
+     *************************************************************/
     /**
      * implement functional interface "ChangeListener"
      */
@@ -63,12 +65,17 @@ public class TaskyPresentationModel {
         taskSelected.addListener(new ChangeListener(){
             // if id changes, lookup other fileds
             @Override public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-                Task temp = getRepo().read(id.get());
-                idProperty().set(temp.id);
-                title.set(temp.data.title);
-                desc.set(temp.data.desc);
-                date.set(temp.data.dueDate);
-                state.set(temp.data.state);
+                if (id.get() != 0) { // id = 0 means, task has been deleted
+                    Task temp = getRepo().read(id.get());
+                    idProperty().set(temp.id);
+                    title.set(temp.data.title);
+                    desc.set(temp.data.desc);
+                    date.set(temp.data.dueDate);
+                    state.set(temp.data.state);
+                } else{
+                    // if task deleted (new id = 0), cleanup form completely
+                    cleanForm();
+                }
             }
         });
     }
@@ -98,6 +105,11 @@ public class TaskyPresentationModel {
         tasks.addAll(repo.read());
     }
 
+    /*************************************************************
+     *                                                           *
+     *                       CRUD                                *
+     *                                                           *
+     *************************************************************/
     /**
      * fired on click on Button "New"
      * creates new Task in repo with empty TaskData
@@ -110,30 +122,7 @@ public class TaskyPresentationModel {
         System.out.println("taskSelectedProperty:" + taskSelectedProperty().get());
         tasks.add(task);
         // cleanup before user enters a task
-        cleanUp();
-        System.out.println("createTask done");
-    }
-
-    /**
-     * Speichert den eingegebenen Task im repository
-     */
-    public void updateTask(Task tmp) {
-        repo.update(tmp);
-    }
-
-    /**
-     * Löscht den neu erstellten Task aus dem repo
-     */
-    public void deleteTask(long task_id) {
-        repo.delete(task_id);
-    }
-
-    public void updateForm(LongProperty id){
-        Task temp = this.getRepo().read(id.get());
-        this.titleProperty().set(temp.data.title);
-        this.descProperty().set(temp.data.desc);
-        this.dateProperty().set(temp.data.dueDate);
-        this.stateProperty().set(temp.data.state);
+        cleanForm();
     }
 
     /**
@@ -142,9 +131,7 @@ public class TaskyPresentationModel {
     public void saveTask(){
         TaskData taskdata = new TaskData(this.titleProperty().get(), this.descProperty().get(), this.dateProperty().get(), this.stateProperty().get());
         Task tmp = new Task(this.idProperty().get(), taskdata);
-        System.out.println("detail: " + taskdata.toString());
-        this.updateTask(tmp);
-        //cleanUp();
+        repo.update(tmp);
     }
 
     /**
@@ -152,9 +139,57 @@ public class TaskyPresentationModel {
      */
     public void deleteTask(){
         if (this.idProperty().get() != 0 ){
-            this.deleteTask(this.idProperty().get());
+            this.repo.delete(this.idProperty().get());
+            taskSelected.set(0);
+            tasks.removeIf(t -> t.id == this.idProperty().get());
         }
-        // cleanUp();
+    }
+    /*************************************************************
+     *                                                           *
+     *                  FORM Actions                             *
+     *                                                           *
+     *************************************************************/
+    /**
+     * Leert das Form mit eingegebenen Informationen
+     */
+    public void cleanForm(){
+        this.titleProperty().set("");
+        this.descProperty().set("");
+        this.dateProperty().set(null);
+        this.stateProperty().set(null);
+
+        //this.buttonsDisable();
+    }
+
+    /**
+     * Hook fuer nach dem Klick auf "New".
+     * Hier kann init, cleanup, button disable eingefuegt werden.
+     * */
+    public void setupForm() {
+        // setup Form
+        this.titleProperty().set("");
+        this.descProperty().set("");
+        this.dateProperty().set(LocalDate.now()); // Localdate
+        this.stateProperty().set(Status.Todo); // Status
+
+        // activate buttons
+        //this.buttonsEnable();
+    }
+
+    /*************************************************************
+     *                                                           *
+     *                  EVENT Actions                            *
+     *                                                           *
+     *************************************************************/
+    /**
+     * Handles MouseClick-Action on a task to update Form
+     * */
+    public void updateForm(LongProperty id){
+        Task temp = this.getRepo().read(id.get());
+        this.titleProperty().set(temp.data.title);
+        this.descProperty().set(temp.data.desc);
+        this.dateProperty().set(temp.data.dueDate);
+        this.stateProperty().set(temp.data.state);
     }
 
     /**
@@ -168,38 +203,21 @@ public class TaskyPresentationModel {
         //this.buttonsEnable();
     }
 
-    /**
-     * Leert das Form mit eingegebenen Informationen
-     */
-    public void cleanUp(){
-        this.titleProperty().set("");
-        this.descProperty().set("");
-        this.dateProperty().set(null);
-        this.stateProperty().set(null);
-
-        //this.buttonsDisable();
-    }
-
-    /**
-     * Hook fuer nach dem Klick auf "New".
-     * Hier kann init, cleanup, button disable eingefuegt werden.
-     * */
-    public void setUp() {
-        // setup Form
-        this.titleProperty().set("");
-        this.descProperty().set("");
-        this.dateProperty().set(LocalDate.now()); // Localdate
-        this.stateProperty().set(Status.Todo); // Status
-
-        // activate buttons
-        //this.buttonsEnable();
-    }
+    /*************************************************************
+     *                                                           *
+     *                 GETTER and SETTER                         *
+     *                                                           *
+     *************************************************************/
 
     /**
      * Getter: repo
      */
     public Repository getRepo() {
         return repo;
+    }
+
+    public ObservableList<Task> tasksList() {
+        return tasks;
     }
 
     // Property-Getter

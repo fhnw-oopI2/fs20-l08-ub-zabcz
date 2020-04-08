@@ -6,6 +6,7 @@ import java.util.List;
 import ch.fhnw.oop2.tasky.model.Status;
 import ch.fhnw.oop2.tasky.model.Task;
 import ch.fhnw.oop2.tasky.model.TaskyPresentationModel;
+import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
@@ -39,8 +40,13 @@ public final class Lane extends GridPane {
 		this.model = model;
 		initializeControls();
 		layoutControls();
+		initChangeListener();
 	}
-	
+
+	private void initChangeListener() {
+		model.tasksList().addListener((ListChangeListener.Change<? extends Task> change) -> layoutControls());
+	}
+
 	private void initializeControls() {
 		// setup laben on top of lane
 		label = new Label(status.toString());
