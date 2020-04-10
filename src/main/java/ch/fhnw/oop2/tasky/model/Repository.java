@@ -58,5 +58,11 @@ public interface Repository {
 	 * @param id  Die ID
 	 */
 	void delete(long id);
+
+	/**
+	 * Löscht alle Tasks aus einem Repo
+	 *
+	 */
+	void deleteAll();
 }
 

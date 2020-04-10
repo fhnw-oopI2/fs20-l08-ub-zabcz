@@ -64,4 +64,8 @@ public class InMemoryMapRepository implements Repository {
 		allTasks.remove(id);
 	}
 
+	public void deleteAll(){
+		allTasks.clear();
+	}
+
 }

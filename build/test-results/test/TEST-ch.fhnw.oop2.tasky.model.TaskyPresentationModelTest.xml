@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="ch.fhnw.oop2.tasky.model.TaskyPresentationModelTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2020-04-08T14:37:13" hostname="LENOVO-L390-YOG" time="0.013">
+<testsuite name="ch.fhnw.oop2.tasky.model.TaskyPresentationModelTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2020-04-10T16:04:44" hostname="LENOVO-L390-YOG" time="0.053">
   <properties/>
-  <testcase name="stageTitleProperty()" classname="ch.fhnw.oop2.tasky.model.TaskyPresentationModelTest" time="0.007"/>
-  <testcase name="updateTask()" classname="ch.fhnw.oop2.tasky.model.TaskyPresentationModelTest" time="0.001"/>
-  <testcase name="initDummyTasks()" classname="ch.fhnw.oop2.tasky.model.TaskyPresentationModelTest" time="0.001"/>
-  <testcase name="getRepo()" classname="ch.fhnw.oop2.tasky.model.TaskyPresentationModelTest" time="0.001"/>
-  <testcase name="deleteTask()" classname="ch.fhnw.oop2.tasky.model.TaskyPresentationModelTest" time="0.0"/>
-  <system-out><![CDATA[]]></system-out>
+  <testcase name="testSetupForm()" classname="ch.fhnw.oop2.tasky.model.TaskyPresentationModelTest" time="0.038"/>
+  <testcase name="testSaveTask()" classname="ch.fhnw.oop2.tasky.model.TaskyPresentationModelTest" time="0.001"/>
+  <testcase name="testMouseClickAction()" classname="ch.fhnw.oop2.tasky.model.TaskyPresentationModelTest" time="0.003"/>
+  <testcase name="testCleanForm()" classname="ch.fhnw.oop2.tasky.model.TaskyPresentationModelTest" time="0.001"/>
+  <testcase name="testTestDeleteTask()" classname="ch.fhnw.oop2.tasky.model.TaskyPresentationModelTest" time="0.001"/>
+  <testcase name="TestInitDummyTasks()" classname="ch.fhnw.oop2.tasky.model.TaskyPresentationModelTest" time="0.002"/>
+  <testcase name="testCreateTask()" classname="ch.fhnw.oop2.tasky.model.TaskyPresentationModelTest" time="0.001"/>
+  <system-out><![CDATA[task01
+]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

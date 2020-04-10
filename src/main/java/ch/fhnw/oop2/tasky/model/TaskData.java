@@ -74,4 +74,19 @@ public class TaskData {
         return true;
     }
 
+    public LocalDate getDueDate() {
+        return dueDate;
+    }
+
+    public Status getState() {
+        return state;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
 }

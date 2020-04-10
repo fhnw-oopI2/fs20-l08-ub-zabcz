@@ -1,6 +1,7 @@
 plugins {
     id 'java'
 }
+wrapper { gradleVersion = '6.2' }
 
 repositories {
 	mavenCentral()

@@ -18,8 +18,8 @@ import java.time.LocalDate;
 
 public class TaskyPresentationModel {
     // constants
-    private static final int MIN_DUMMY_TASKS = 1;
-    private static final int MAX_DUMMY_TASKS = 4;
+    public static final int MIN_DUMMY_TASKS = 1;
+    public static final int MAX_DUMMY_TASKS = 4;
 
     private Repository repo;
     private ObservableList<Task> tasks;
@@ -327,4 +327,5 @@ public class TaskyPresentationModel {
     public ObjectProperty<Status> stateProperty() {
         return state;
     }
+
 }
